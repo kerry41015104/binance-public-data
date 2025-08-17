@@ -49,7 +49,7 @@ python [腳本名稱] -t [交易類型] -s [交易對] [其他參數] -f [格式
 ### 主要參數
 - **`-s`** - 交易對： (cm) 的標的名稱需要注意 [幣本位頁面](https://data.binance.vision/?prefix=data/futures/cm/daily/klines/)
 - **`-i`** - 僅 klines資料<br>
-    daily: ["1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "8h", "12h", "1d"]
+    daily: ["1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "8h", "12h", "1d"]<br>
     monthly: ["1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "8h", "12h", "1d", "3d", "1w", "1mo"]
 - **`-startDate` + `-endDate `** - 通常不使用，會新增一個日期區間的資料夾
 - **`-skip-monthly`** - 通常要加，以下載日頻為主
