@@ -10,14 +10,14 @@
 
 import sys
 from argparse import ArgumentParser, RawTextHelpFormatter, ArgumentTypeError
-from datetime import *
+from datetime import date, datetime
 import pandas as pd
 from enums import *
 from utility import download_file, get_all_symbols, get_parser, get_start_end_date_objects, convert_to_date_object, \
   get_path
 
 
-def download_monthly_aggTrades(trading_type, symbols, num_symbols, years, months, start_date, end_date, folder, checksum):
+def download_monthly_aggTrades(trading_type, symbols, num_symbols, years, months, start_date, end_date, folder, checksum, data_format=".zip"):
   current = 0
   date_range = None
 
@@ -44,16 +44,16 @@ def download_monthly_aggTrades(trading_type, symbols, num_symbols, years, months
         if current_date >= start_date and current_date <= end_date:
           path = get_path(trading_type, "aggTrades", "monthly", symbol)
           file_name = "{}-aggTrades-{}-{}.zip".format(symbol.upper(), year, '{:02d}'.format(month))
-          download_file(path, file_name, date_range, folder)
+          download_file(path, file_name, date_range, folder, data_format)
 
           if checksum == 1:
             checksum_path = get_path(trading_type, "aggTrades", "monthly", symbol)
             checksum_file_name = "{}-aggTrades-{}-{}.zip.CHECKSUM".format(symbol.upper(), year, '{:02d}'.format(month))
-            download_file(checksum_path, checksum_file_name, date_range, folder)
+            download_file(checksum_path, checksum_file_name, date_range, folder, ".zip")
     
     current += 1
 
-def download_daily_aggTrades(trading_type, symbols, num_symbols, dates, start_date, end_date, folder, checksum):
+def download_daily_aggTrades(trading_type, symbols, num_symbols, dates, start_date, end_date, folder, checksum, data_format=".zip"):
   current = 0
   date_range = None
 
@@ -79,12 +79,12 @@ def download_daily_aggTrades(trading_type, symbols, num_symbols, dates, start_da
       if current_date >= start_date and current_date <= end_date:
         path = get_path(trading_type, "aggTrades", "daily", symbol)
         file_name = "{}-aggTrades-{}.zip".format(symbol.upper(), date)
-        download_file(path, file_name, date_range, folder)
+        download_file(path, file_name, date_range, folder, data_format)
 
         if checksum == 1:
           checksum_path = get_path(trading_type, "aggTrades", "daily", symbol)
           checksum_file_name = "{}-aggTrades-{}.zip.CHECKSUM".format(symbol.upper(), date)
-          download_file(checksum_path, checksum_file_name, date_range, folder)
+          download_file(checksum_path, checksum_file_name, date_range, folder, ".zip")
 
     current += 1
 
@@ -109,7 +109,7 @@ if __name__ == "__main__":
       dates = pd.date_range(end=datetime.today(), periods=period.days + 1).to_pydatetime().tolist()
       dates = [date.strftime("%Y-%m-%d") for date in dates]
       if args.skip_monthly == 0:
-        download_monthly_aggTrades(args.type, symbols, num_symbols, args.years, args.months, args.startDate, args.endDate, args.folder, args.checksum)
+        download_monthly_aggTrades(args.type, symbols, num_symbols, args.years, args.months, args.startDate, args.endDate, args.folder, args.checksum, args.data_format)
     if args.skip_daily == 0:
-      download_daily_aggTrades(args.type, symbols, num_symbols, dates, args.startDate, args.endDate, args.folder, args.checksum)
+      download_daily_aggTrades(args.type, symbols, num_symbols, dates, args.startDate, args.endDate, args.folder, args.checksum, args.data_format)
     

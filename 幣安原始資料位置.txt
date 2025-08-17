@@ -1,0 +1,52 @@
+spot/
+├── daily/
+│   ├── aggTrades/
+│   ├── klines/
+│   ├── trades/
+├── monthly/
+│   ├── aggTrades/
+│   ├── klines/
+│   ├── trades/
+
+futures/
+├── um/
+│   ├── daily/
+│   │   ├── aggTrades/
+│   │   ├── klines/
+│   │   ├── trades/
+│   │   ├── indexPriceKlines/
+│   │   ├── markPriceKlines/
+│   │   ├── premiumIndexKlines/
+│   │   ├── bookDepth/
+│   │   ├── bookTicker/
+│   │   └── metrics/
+│   └── monthly/
+│       ├── aggTrades/
+│       ├── klines/
+│       ├── trades/
+│       ├── indexPriceKlines/
+│       ├── markPriceKlines/
+│       ├── premiumIndexKlines/
+│       ├── bookTicker/
+│       └── fundingRate/
+
+└── cm/
+    ├── daily/
+    │   ├── aggTrades/
+    │   ├── klines/
+    │   ├── trades/
+    │   ├── indexPriceKlines/
+    │   ├── markPriceKlines/
+    │   ├── premiumIndexKlines/
+    │   ├── bookDepth/
+    │   ├── bookTicker/
+    │   └── metrics/
+    └── monthly/
+        ├── aggTrades/
+        ├── klines/
+        ├── trades/
+        ├── indexPriceKlines/
+        ├── markPriceKlines/
+        ├── premiumIndexKlines/
+        ├── bookTicker/
+        └── fundingRate/

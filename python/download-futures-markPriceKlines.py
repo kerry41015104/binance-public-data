@@ -8,7 +8,7 @@
 
 """
 import sys
-from datetime import *
+from datetime import date, datetime
 
 import pandas as pd
 
@@ -18,7 +18,7 @@ from utility import download_file, get_all_symbols, get_parser, convert_to_date_
 
 
 def download_monthly_markPriceKlines(trading_type, symbols, num_symbols, intervals, years, months, start_date,
-                                      end_date, folder, checksum):
+                                      end_date, folder, checksum, data_format=".zip"):
     current = 0
     date_range = None
 
@@ -38,7 +38,7 @@ def download_monthly_markPriceKlines(trading_type, symbols, num_symbols, interva
     print("Found {} symbols".format(num_symbols))
 
     for symbol in symbols:
-        print("[{}/{}] - start download monthly {} markPriceKlines ".format(current + 1, num_symbols, symbol))
+        print("[{}/{}] - start download monthly {} klines ".format(current + 1, num_symbols, symbol))
         for interval in intervals:
             for year in years:
                 for month in months:
@@ -46,19 +46,19 @@ def download_monthly_markPriceKlines(trading_type, symbols, num_symbols, interva
                     if start_date <= current_date <= end_date:
                         path = get_path(trading_type, "markPriceKlines", "monthly", symbol, interval)
                         file_name = "{}-{}-{}-{}.zip".format(symbol.upper(), interval, year, '{:02d}'.format(month))
-                        download_file(path, file_name, date_range, folder)
+                        download_file(path, file_name, date_range, folder, data_format)
 
                         if checksum == 1:
                             checksum_path = get_path(trading_type, "markPriceKlines", "monthly", symbol, interval)
                             checksum_file_name = "{}-{}-{}-{}.zip.CHECKSUM".format(symbol.upper(), interval, year,
                                                                                    '{:02d}'.format(month))
-                            download_file(checksum_path, checksum_file_name, date_range, folder)
+                            download_file(checksum_path, checksum_file_name, date_range, folder, ".zip")
 
         current += 1
 
 
 def download_daily_markPriceKlines(trading_type, symbols, num_symbols, intervals, dates, start_date, end_date, folder,
-                                    checksum):
+                                    checksum, data_format=".zip"):
     current = 0
     date_range = None
 
@@ -80,29 +80,29 @@ def download_daily_markPriceKlines(trading_type, symbols, num_symbols, intervals
     print("Found {} symbols".format(num_symbols))
 
     for symbol in symbols:
-        print("[{}/{}] - start download daily {} markPriceKlines ".format(current + 1, num_symbols, symbol))
+        print("[{}/{}] - start download daily {} klines ".format(current + 1, num_symbols, symbol))
         for interval in intervals:
             for date in dates:
                 current_date = convert_to_date_object(date)
                 if start_date <= current_date <= end_date:
                     path = get_path(trading_type, "markPriceKlines", "daily", symbol, interval)
                     file_name = "{}-{}-{}.zip".format(symbol.upper(), interval, date)
-                    download_file(path, file_name, date_range, folder)
+                    download_file(path, file_name, date_range, folder, data_format)
 
                     if checksum == 1:
                         checksum_path = get_path(trading_type, "markPriceKlines", "daily", symbol, interval)
                         checksum_file_name = "{}-{}-{}.zip.CHECKSUM".format(symbol.upper(), interval, date)
-                        download_file(checksum_path, checksum_file_name, date_range, folder)
+                        download_file(checksum_path, checksum_file_name, date_range, folder, ".zip")
 
         current += 1
 
 
 if __name__ == "__main__":
-    parser = get_parser('klines')
+    parser = get_parser('markPriceKlines')
     args = parser.parse_args(sys.argv[1:])
 
-    if args.type == 'spot':
-        raise_arg_error('Valid Type: um, cm')
+    if args.type not in ["um", "cm"]:
+        raise_arg_error("MarkPriceKlines is only for the um or cm trading type")
 
     if not args.symbols:
         print("fetching all symbols from exchange")
@@ -115,10 +115,13 @@ if __name__ == "__main__":
     if args.dates:
         dates = args.dates
     else:
-        period = convert_to_date_object(datetime.today().strftime('%Y-%m-%d')) - convert_to_date_object(PERIOD_START_DATE)
+        period = convert_to_date_object(datetime.today().strftime('%Y-%m-%d')) - convert_to_date_object(
+            PERIOD_START_DATE)
         dates = pd.date_range(end=datetime.today(), periods=period.days + 1).to_pydatetime().tolist()
         dates = [date.strftime("%Y-%m-%d") for date in dates]
-        download_monthly_markPriceKlines(args.type, symbols, num_symbols, args.intervals, args.years, args.months,
-                                          args.startDate, args.endDate, args.folder, args.checksum)
-    download_daily_markPriceKlines(args.type, symbols, num_symbols, args.intervals, dates, args.startDate,
-                                    args.endDate, args.folder, args.checksum)
+        if args.skip_monthly == 0:
+            download_monthly_markPriceKlines(args.type, symbols, num_symbols, args.intervals, args.years,
+                                              args.months, args.startDate, args.endDate, args.folder, args.checksum, args.data_format)
+    if args.skip_daily == 0:
+        download_daily_markPriceKlines(args.type, symbols, num_symbols, args.intervals, dates, args.startDate,
+                                        args.endDate, args.folder, args.checksum, args.data_format)
