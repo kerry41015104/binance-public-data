@@ -21,14 +21,6 @@
 ```bash
 pip install -r requirements.txt
 ```
-
-依賴包括：
-- `pandas` - 資料處理
-- `pyarrow` - Parquet/Feather 格式支援
-- `fastparquet` - 替代的 Parquet 實現
-- `tables` - HDF5 格式支援
-- `python-dotenv` - 環境變數管理
-
 ## 📋 可用的下載腳本
 
 ### 通用腳本 (支援 spot/um/cm)
@@ -55,21 +47,36 @@ python [腳本名稱] -t [交易類型] -s [交易對] [其他參數] -f [格式
 ```
 
 ### 主要參數
-- **`-t`** - 交易類型：`spot`, `um`, `cm`
-- **`-s`** - 交易對：如 `BTCUSDT`, `ETHUSDT` (um), `BTCUSD`, `ETHUSD` (cm)
-- **`-i`** - 時間間隔：`1m`, `5m`, `1h`, `1d` 等 (僅 K線資料)
-- **`-f`** - 資料格式：`.zip`, `.csv`, `.parquet`, `.feather`, `.h5`
-- **`-startDate`** - 開始日期：`2024-01-01`
-- **`-endDate`** - 結束日期：`2024-01-02`
-- **`-skip-monthly`** - 跳過月資料：`1`
-- **`-skip-daily`** - 跳過日資料：`1`
+- **`-s`** - 交易對： (cm) 的標的名稱需要注意 [幣本位頁面](https://data.binance.vision/?prefix=data/futures/cm/daily/klines/)
+- **`-i`** - 僅 klines資料<br>
+    daily: ["1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "8h", "12h", "1d"]
+    monthly: ["1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "8h", "12h", "1d", "3d", "1w", "1mo"]
+- **`-startDate` + `-endDate `** - 通常不使用，會新增一個日期區間的資料夾
+- **`-skip-monthly`** - 通常要加，以下載日頻為主
+
+| Argument        | Explanation | Default | Mandatory |      
+| :---------------: | ---------------- | :----------------: | :----------------: |
+| -t              | Market type: **spot**, **um** (USD-M Futures), **cm** (COIN-M Futures) | spot | Yes |
+| -s              | Single **symbol** or multiple **symbols** separated by space | All symbols | No |
+| -i              | single kline **interval** or multiple **intervals** separated by space      | All intervals | No |
+| -y              | Single **year** or multiple **years** separated by space| All available years from 2020 to current year | No |
+| -m              | Single **month** or multiple **months** separated by space | All available months | No |
+| -d              | single **date** or multiple **dates** separated by space    | All available dates from 2020-01-01 | No |
+| -startDate      | **Starting date** to download in [YYYY-MM-DD] format    | 2020-01-01 | No |
+| -endDate        | **Ending date** to download in [YYYY-MM-DD] format     | Current date | No |
+| -skip-monthly   | 1 to skip downloading of monthly data | 0 | No |
+| -skip-daily     | 1 to skip downloading of daily data | 0 | No |
+| -folder         | **Directory** to store the downloaded data    | Current directory | No |
+| -c              | 1 to download **checksum file** | 0 | No |
+| -f              | data type: `.zip`, `.csv`, `.parquet`, `.feather`, `.h5` | `.zip` | No |
+| -h              | show help messages| - | No |
 
 ## 📊 使用範例
 
 ### 現貨資料
 ```bash
-# K線資料
-python download-kline.py -t spot -s BTCUSDT -i 1h -startDate 2024-01-01 -endDate 2024-01-02 -f .csv
+# K線資料(常用)
+python download-kline.py -t spot -i 1m -f .parquet
 
 # 交易資料
 python download-trade.py -t spot -s ETHUSDT -startDate 2024-01-01 -endDate 2024-01-01 -f .parquet
@@ -81,7 +88,7 @@ python download-aggTrade.py -t spot -s ADAUSDT -startDate 2024-01-01 -endDate 20
 ### USDⓈ-M 期貨資料
 ```bash
 # 基本K線
-python download-kline.py -t um -s BTCUSDT -i 1h -startDate 2024-01-01 -endDate 2024-01-01 -f .csv
+python download-kline.py -t um -i 1m -f .parquet
 
 # 標記價格K線
 python download-futures-markPriceKlines.py -t um -s ETHUSDT -i 1h -startDate 2024-01-01 -endDate 2024-01-01 -f .parquet
@@ -96,7 +103,7 @@ python download-futures-fundingRate.py -t um -s BTCUSDT -y 2024 -m 1 -f .h5
 ### COIN-M 期貨資料
 ```bash
 # 基本K線
-python download-kline.py -t cm -s BTCUSD -i 1h -startDate 2024-01-01 -endDate 2024-01-01 -f .csv
+python download-kline.py -t cm -i 1m -f .parquet
 
 # 索引價格K線
 python download-futures-indexPriceKlines.py -t cm -s ETHUSD -i 1h -startDate 2024-01-01 -endDate 2024-01-01 -f .parquet
@@ -192,33 +199,6 @@ data/
 STORE_DIRECTORY=/path/to/your/data/directory
 ```
 
-## 🔍 格式特性比較
-
-| 格式 | 檔案大小 | 讀取速度 | 壓縮率 | 相容性 | 適用場景 |
-|------|----------|----------|---------|---------|----------|
-| ZIP | 中等 | 慢 | 好 | 通用 | 原始資料保存 |
-| CSV | 大 | 中等 | 無 | 最佳 | 人類可讀，廣泛支援 |
-| Parquet | 小 | 快 | 極佳 | 好 | 大數據分析，雲端 |
-| Feather | 中等 | 極快 | 中等 | 中等 | 快速原型開發 |
-| HDF5 | 小 | 快 | 好 | 中等 | 科學計算，複雜查詢 |
-
-## 📝 重要特性
-
-### 統一的欄位命名
-- 自動檢測和處理有/無標題的 CSV 檔案
-- 統一使用標準欄位名稱，便於後續分析
-- 支援多種資料類型的自動識別
-
-### 智能檔案處理
-- 自動解壓縮和格式轉換
-- 完整的錯誤處理和檔案清理
-- 支援中斷和重新開始下載
-
-### 靈活的時間範圍
-- 支援日期範圍 (`-startDate`, `-endDate`)
-- 支援年月選擇 (`-y`, `-m`)
-- 可選擇跳過 daily 或 monthly 資料
-
 ## 🚨 注意事項
 
 ### 交易對格式
@@ -231,28 +211,6 @@ STORE_DIRECTORY=/path/to/your/data/directory
 - **bookTicker**: daily + monthly 資料
 - **其他資料類型**: 通常都有 daily + monthly
 
-### 效能建議
-- **大量資料**: 建議使用 Parquet 格式
-- **頻繁讀寫**: 建議使用 Feather 格式
-- **人工檢查**: 建議使用 CSV 格式
-- **科學計算**: 建議使用 HDF5 格式
-
-## 🛠️ 故障排除
-
-### 常見問題
-1. **找不到檔案**: 檢查日期範圍和交易對是否存在
-2. **格式轉換失敗**: 檢查磁碟空間和檔案權限
-3. **參數錯誤**: 檢查交易類型和交易對格式是否匹配
-
-### 快速檢查
-```bash
-# 檢查腳本參數
-python download-kline.py --help
-
-# 測試下載單日資料
-python download-kline.py -t spot -s BTCUSDT -i 1h -startDate 2024-01-01 -endDate 2024-01-01 -f .csv -skip-monthly 1
-```
-
 ## 📄 版本資訊
 
 - **支援的資料格式**: 5 種 (ZIP, CSV, Parquet, Feather, HDF5)
@@ -262,4 +220,4 @@ python download-kline.py -t spot -s BTCUSDT -i 1h -startDate 2024-01-01 -endDate
 
 ---
 
-更多資訊請參考 [Binance 公開資料文檔](https://github.com/binance/binance-public-data)
+更多資訊請參考 [Binance 原始文檔](https://github.com/binance/binance-public-data)
