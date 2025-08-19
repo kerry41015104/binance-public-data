@@ -1,0 +1,8 @@
+# Binance 資料庫腳本依賴包
+psycopg2-binary>=2.9.0
+pandas>=1.5.0
+numpy>=1.21.0
+python-dotenv>=0.19.0
+pyarrow>=10.0.0  # for parquet support
+pytables>=3.7.0    # for HDF5 support
+fastparquet>=0.8.0  # alternative parquet support

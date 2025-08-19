@@ -1,0 +1,8 @@
+2025-08-19 12:50:08,523 - INFO - === BULK-INCREMENTAL-20250819-125008 任務開始 ===
+2025-08-19 12:50:08,523 - INFO - 日誌文件: D:\code\Trading-Universe\binance-public-data\database_scripts\logs\bulk_incremental_20250819_125008_20250819.log
+2025-08-19 12:50:08,523 - INFO - 開始時間: 2025-08-19 12:50:08.523099
+2025-08-19 12:50:08,523 - INFO - 解析路徑: D:\code\Trading-Universe\crypto-data-overall\binance-public-data\data\futures\um\daily\klines
+2025-08-19 12:50:08,523 - INFO - 推斷的交易類型: um
+2025-08-19 12:50:08,523 - INFO - 推斷的資料類型: klines
+2025-08-19 12:50:08,532 - INFO - 找到 121 個標的: ['1000SHIBUSDT', '1000XECUSDT', '1INCHUSDT', 'AAVEUSDT', 'ADAUSDT', 'ALGOUSDT', 'ALICEUSDT', 'ALPHAUSDT', 'ANKRUSDT', 'ARPAUSDT']...
+2025-08-19 12:50:08,532 - INFO - 找到間隔: ['1m']

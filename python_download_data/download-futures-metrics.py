@@ -14,7 +14,7 @@ import pandas as pd
 
 from enums import START_DATE, END_DATE, PERIOD_START_DATE
 from utility import download_file, get_all_symbols, get_parser, convert_to_date_object, \
-    get_path, raise_arg_error
+    get_path, raise_arg_error, check_existing_files
 
 
 def download_daily_metrics(trading_type, symbols, num_symbols, dates, start_date, end_date, folder, checksum, data_format=".zip"):
@@ -75,6 +75,19 @@ if __name__ == "__main__":
             PERIOD_START_DATE)
         dates = pd.date_range(end=datetime.today(), periods=period.days + 1).to_pydatetime().tolist()
         dates = [date.strftime("%Y-%m-%d") for date in dates]
-        
-    # Metrics only has daily data
-    download_daily_metrics(args.type, symbols, num_symbols, dates, args.startDate, args.endDate, args.folder, args.checksum, args.data_format)
+    
+    # Check existing files before downloading
+    print("\n=== 📊 METRICS 資料檢查 ===")
+    print("\n📅 檢查日資料...")
+    
+    need_daily = check_existing_files(
+        args.type, "metrics", symbols, "daily", 
+        None, None, None, 
+        dates, args.startDate, args.endDate, args.folder
+    )
+    
+    if need_daily:
+        # Metrics only has daily data
+        download_daily_metrics(args.type, symbols, num_symbols, dates, args.startDate, args.endDate, args.folder, args.checksum, args.data_format)
+    else:
+        print("✅ 日資料已完整，跳過下載")

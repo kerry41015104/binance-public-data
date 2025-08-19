@@ -14,7 +14,7 @@ import pandas as pd
 
 from enums import START_DATE, END_DATE, PERIOD_START_DATE
 from utility import download_file, get_all_symbols, get_parser, convert_to_date_object, \
-    get_path, raise_arg_error
+    get_path, raise_arg_error, check_existing_files
 
 
 def download_monthly_bookTicker(trading_type, symbols, num_symbols, years, months, start_date, end_date, folder, checksum, data_format=".zip"):
@@ -112,9 +112,30 @@ if __name__ == "__main__":
             PERIOD_START_DATE)
         dates = pd.date_range(end=datetime.today(), periods=period.days + 1).to_pydatetime().tolist()
         dates = [date.strftime("%Y-%m-%d") for date in dates]
-        
-        if args.skip_monthly == 0:
+    
+    # Check existing files before downloading
+    print("\n=== 📊 BOOK TICKER 資料檢查 ===")
+    
+    if args.skip_monthly == 0:
+        print("\n🗓️ 檢查月資料...")
+        need_monthly = check_existing_files(
+            args.type, "bookTicker", symbols, "monthly", 
+            None, args.years, args.months, 
+            None, args.startDate, args.endDate, args.folder
+        )
+        if need_monthly:
             download_monthly_bookTicker(args.type, symbols, num_symbols, args.years, args.months, args.startDate, args.endDate, args.folder, args.checksum, args.data_format)
+        else:
+            print("✅ 月資料已完整，跳過下載")
             
     if args.skip_daily == 0:
-        download_daily_bookTicker(args.type, symbols, num_symbols, dates, args.startDate, args.endDate, args.folder, args.checksum, args.data_format)
+        print("\n📅 檢查日資料...")
+        need_daily = check_existing_files(
+            args.type, "bookTicker", symbols, "daily", 
+            None, None, None, 
+            dates, args.startDate, args.endDate, args.folder
+        )
+        if need_daily:
+            download_daily_bookTicker(args.type, symbols, num_symbols, dates, args.startDate, args.endDate, args.folder, args.checksum, args.data_format)
+        else:
+            print("✅ 日資料已完整，跳過下載")
