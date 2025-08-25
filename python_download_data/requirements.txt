@@ -1,5 +1,15 @@
-pandas
-pyarrow
-fastparquet
-pytables
-python-dotenv
+# 原有依賴
+pandas>=1.5.0
+python-dotenv>=0.19.0
+
+# 新增依賴 - 系統監控和效能優化
+psutil>=5.9.0          # 系統資源監控
+pyarrow>=10.0.0        # Parquet 格式支援，更快的資料處理
+fastparquet>=0.8.0     # 備用 Parquet 引擎
+pytables>=3.7.0          # HDF5 格式支援
+feather-format>=0.4.1  # Feather 格式支援
+
+# 可選依賴 - 進階功能
+tqdm>=4.64.0           # 進度條顯示
+colorama>=0.4.4        # 彩色輸出 (Windows)
+rich>=12.0.0           # 美化終端輸出
