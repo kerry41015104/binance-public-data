@@ -500,9 +500,9 @@ def demo_usage():
     with OptimizedBinanceDataScraper() as scraper:
 
         # 單個查詢示例
-        print("1. 獲取BTCUSDT 1m K線最早ZIP文件日期:")
+        print("1. 獲取BIOUSDT 1m K線最早ZIP文件日期:")
         earliest_date = scraper.get_earliest_date_for_symbol(
-            trading_type="um", data_type="klines", symbol="BTCUSDT", interval="1m"
+            trading_type="um", data_type="klines", symbol="BIOUSDC", interval="1m"
         )
         print(f"   結果: {earliest_date}\n")
 

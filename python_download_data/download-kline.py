@@ -185,7 +185,10 @@ class DownloadProgressTracker:
                 print(f"   ⚠️ 獲取 {symbol} 網頁最早日期失敗: {e}")
                 start_date_from_web = start_date
             try:
-                start_date_from_web = convert_to_date_object(start_date_from_web)
+                if type(start_date_from_web) is str:
+                    start_date_from_web = convert_to_date_object(start_date_from_web)
+                else:
+                    pass
             except Exception as e:
                 print(f"   ⚠️ 解析 {symbol} 網頁最早日期失敗: {e}")
                 start_date_from_web = start_date
