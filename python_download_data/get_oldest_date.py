@@ -429,6 +429,8 @@ class OptimizedBinanceDataScraper:
                 type_path = "?prefix=data/futures/um"
             elif trading_type == "cm":
                 type_path = "?prefix=data/futures/cm"
+            elif trading_type == "option":
+                type_path = "?prefix=data/option"
             else:
                 logger.error(f"不支持的交易類型: {trading_type}")
                 return None
@@ -440,6 +442,17 @@ class OptimizedBinanceDataScraper:
                 "premiumIndexKlines",
             ]:
                 url = f"{base_url}/?prefix={type_path}/daily/{data_type}/{symbol.upper()}/{interval}/"
+            elif data_type == "BVOLIndex":
+                if symbol == "BTCUSDT" or symbol == "BTCBVOLUSDT":
+                    url = (
+                        f"{base_url}/?prefix={type_path}/daily/{data_type}/BTCBVOLUSDT/"
+                    )
+                elif symbol == "ETHUSDT" or symbol == "ETHBVOLUSDT":
+                    url = (
+                        f"{base_url}/?prefix={type_path}/daily/{data_type}/ETHBVOLUSDT/"
+                    )
+                else:
+                    logger.error(f"BVOLIndex僅支持BTCUSDT和ETHUSDT")
             else:
                 url = f"{base_url}/?prefix={type_path}/daily/{data_type}/{symbol.upper()}/"
 
@@ -500,9 +513,12 @@ def demo_usage():
     with OptimizedBinanceDataScraper() as scraper:
 
         # 單個查詢示例
-        print("1. 獲取BIOUSDT 1m K線最早ZIP文件日期:")
+        print("1. 獲取BTCUSDT 1m K線最早ZIP文件日期:")
         earliest_date = scraper.get_earliest_date_for_symbol(
-            trading_type="um", data_type="klines", symbol="BIOUSDC", interval="1m"
+            trading_type="option",
+            data_type="BVOLIndex",
+            symbol="BTCBVOLUSDT",
+            interval=None,
         )
         print(f"   結果: {earliest_date}\n")
 

@@ -32,7 +32,7 @@ DAILY_INTERVALS = [
     "12h",
     "1d",
 ]
-TRADING_TYPE = ["spot", "um", "cm"]
+TRADING_TYPE = ["spot", "um", "cm", "option"]
 DATA_FORMATS = [".zip", ".csv", ".parquet", ".feather", ".h5"]
 MONTHS = list(range(1, 13))
 PERIOD_START_DATE = "2020-01-01"

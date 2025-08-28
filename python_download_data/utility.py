@@ -58,10 +58,14 @@ def get_all_symbols(type):
         response = urllib.request.urlopen(
             "https://dapi.binance.com/dapi/v1/exchangeInfo"
         ).read()
-    else:
+    elif type == "spot":
         response = urllib.request.urlopen(
             "https://api.binance.com/api/v3/exchangeInfo"
         ).read()
+    else:  # 只支援 BTCUSDT ETHUSDT
+        response = json.dumps(
+            {"symbols": [{"symbol": "BTCUSDT"}, {"symbol": "ETHUSDT"}]}
+        )
     return list(map(lambda symbol: symbol["symbol"], json.loads(response)["symbols"]))
 
 
@@ -507,6 +511,14 @@ def convert_zip_to_format(zip_path, target_format):
                 ]
             elif "fundingRate" in zip_path:
                 return ["calc_time", "funding_interval_hours", "last_funding_rate"]
+            elif "BVOLIndex" in zip_path:
+                return [
+                    "calc_time",
+                    "symbol",
+                    "base_asset",
+                    "quote_asset",
+                    "index_value",
+                ]
             else:
                 return None
 
@@ -822,9 +834,13 @@ def raise_arg_error(msg):
 
 
 def get_path(trading_type, market_data_type, time_period, symbol, interval=None):
-    trading_type_path = "data/spot"
-    if trading_type != "spot":
+    if trading_type == "spot":
+        trading_type_path = "data/spot"
+    elif trading_type == "option":
+        trading_type_path = "data/option"
+    else:
         trading_type_path = f"data/futures/{trading_type}"
+
     if interval is not None:
         path = f"{trading_type_path}/{time_period}/{market_data_type}/{symbol.upper()}/{interval}/"
     else:

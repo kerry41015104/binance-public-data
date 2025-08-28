@@ -50,3 +50,7 @@ futures/
         ├── premiumIndexKlines/
         ├── bookTicker/
         └── fundingRate/
+
+option/
+├── daily/
+│   ├── BVOLIndex/
