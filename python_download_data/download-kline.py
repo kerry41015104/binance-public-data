@@ -184,14 +184,23 @@ class DownloadProgressTracker:
             except Exception as e:
                 print(f"   ⚠️ 獲取 {symbol} 網頁最早日期失敗: {e}")
                 start_date_from_web = start_date
+
+            # 若回傳 None（標的不存在於頁面），直接跳過，不下載任何日期
+            if start_date_from_web is None:
+                print(f"   ⚠️ {symbol} 在資料來源頁面上找不到，略過下載")
+                return []
+
             try:
                 if type(start_date_from_web) is str:
                     start_date_from_web = convert_to_date_object(start_date_from_web)
-                else:
-                    pass
+                # 若轉換後仍為 None，fallback 到 start_date
+                if start_date_from_web is None:
+                    print(f"   ⚠️ {symbol} 最早日期轉換結果為 None，使用預設起始日期")
+                    start_date_from_web = start_date
             except Exception as e:
                 print(f"   ⚠️ 解析 {symbol} 網頁最早日期失敗: {e}")
                 start_date_from_web = start_date
+
             for date_str in all_dates:
                 current_date = convert_to_date_object(date_str)
                 if (
