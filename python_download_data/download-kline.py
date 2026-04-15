@@ -81,6 +81,8 @@ class DownloadProgressTracker:
             "total_downloaded": 0,
             "last_updated": None,
             "trading_type": trading_type,
+            "is_delisted": False,
+            "delisted_detected_date": None,
         }
 
         if os.path.exists(status_file):
@@ -150,11 +152,53 @@ class DownloadProgressTracker:
         self.save_symbol_status(trading_type, symbol, interval, status)
         return status
 
+    def detect_delisted(self, status, today=None):
+        """
+        判斷標的是否已下市。
+        條件：
+        1. 有 latest_date（曾成功下載過）
+        2. latest_date 之後存在 >= 7 天的連續失敗日期
+        3. 失敗日期中最新一筆距今 <= 3 天（代表最近確實嘗試過，非舊資料）
+        回傳 True 表示判定為已下市。
+        """
+        if not status["latest_date"]:
+            return False
+
+        if today is None:
+            today = datetime.now(timezone.utc).date()
+
+        latest_date = convert_to_date_object(status["latest_date"])
+        all_failed = set(status["failed_dates"] + status["conversion_failed_dates"])
+
+        # 只看 latest_date 之後的失敗日期
+        post_latest_failures = sorted(
+            [
+                convert_to_date_object(d)
+                for d in all_failed
+                if convert_to_date_object(d) > latest_date
+            ]
+        )
+
+        if len(post_latest_failures) < 7:
+            return False
+
+        # 最新失敗日期需距今 <= 3 天，確認是近期嘗試過的
+        most_recent_failure = post_latest_failures[-1]
+        if (today - most_recent_failure).days > 3:
+            return False
+
+        return True
+
     def get_dates_to_download(
         self, trading_type, symbol, interval, all_dates, start_date, end_date
     ):
         """獲取需要下載的日期列表"""
         status = self.load_symbol_status(trading_type, symbol, interval)
+
+        # 若已標記為下市，直接跳過
+        if status.get("is_delisted", False):
+            print(f"   ⏭️  {symbol} {interval} 已標記為下市，跳過")
+            return []
 
         # 獲取失敗的日期（合併下載失敗和轉換失敗）
         failed_dates = set(status["failed_dates"] + status["conversion_failed_dates"])
@@ -163,6 +207,19 @@ class DownloadProgressTracker:
         dates_to_download = []
 
         if status["latest_date"]:
+            # 下市偵測：在產生新下載清單前先判斷
+            if self.detect_delisted(status):
+                print(
+                    f"   🔴 {symbol} {interval} 偵測到下市（最後成功: {status['latest_date']}，"
+                    f"後續 {len([d for d in failed_dates if convert_to_date_object(d) > convert_to_date_object(status['latest_date'])])} 天持續失敗），標記並跳過"
+                )
+                status["is_delisted"] = True
+                status["delisted_detected_date"] = (
+                    datetime.now(timezone.utc).date().isoformat()
+                )
+                self.save_symbol_status(trading_type, symbol, interval, status)
+                return []
+
             latest_date = convert_to_date_object(status["latest_date"])
             next_date = latest_date + timedelta(days=1)
 
@@ -210,9 +267,17 @@ class DownloadProgressTracker:
                 ):
                     dates_to_download.append(date_str)
 
-        # 添加失敗的日期
+        # 添加失敗的日期（僅限 latest_date 之前，避免重跑已下市標的）
+        latest_date_obj = (
+            convert_to_date_object(status["latest_date"])
+            if status["latest_date"]
+            else None
+        )
         for date_str in failed_dates:
             current_date = convert_to_date_object(date_str)
+            # 若有 latest_date，只重試不超過 latest_date 的失敗日期（補齊歷史缺口）
+            if latest_date_obj and current_date > latest_date_obj:
+                continue
             if (
                 current_date >= start_date
                 and current_date <= end_date
